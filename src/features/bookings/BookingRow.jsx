@@ -1,11 +1,17 @@
 import styled from "styled-components";
-import { format, isToday } from "date-fns";
+import {format, isToday} from "date-fns";
 
 import Tag from "../../ui/Tag.jsx";
 import Table from "../../ui/Table.jsx";
 
-import { formatCurrency } from "../../utils/helpers.js";
-import { formatDistanceFromNow } from "../../utils/helpers.js";
+import {formatCurrency, formatDistanceFromNow} from "../../utils/helpers.js";
+import Menus from "../../ui/Menus.jsx";
+import {HiArrowDownOnSquare, HiArrowUpOnSquare, HiEye, HiTrash} from "react-icons/hi2";
+import {useNavigate} from "react-router-dom";
+import useCheckout from "../check-in-out/useCheckout.js";
+import useDeleteBooking from "./useDeleteBooking.js";
+import ConfirmDelete from "../../ui/ConfirmDelete.jsx";
+import Modal from "../../ui/Modal.jsx";
 
 const Cabin = styled.div`
   font-size: 1.6rem;
@@ -35,25 +41,27 @@ const Amount = styled.div`
 `;
 
 function BookingRow({
-  booking: {
-    id: bookingId,
-    created_at,
-    startDate,
-    endDate,
-    numNights,
-    numGuests,
-    totalPrice,
-    status,
-    guests: { fullName: guestName, email },
-    cabins: { name: cabinName },
-  },
-}) {
+                      booking: {
+                        id: bookingId,
+                        created_at,
+                        start_date,
+                        end_date,
+                        num_nights,
+                        num_guests,
+                        total_price,
+                        status,
+                        guests: {full_name: guestName, email},
+                        cabins: {name: cabinName},
+                      },
+                    }) {
   const statusToTagName = {
     unconfirmed: "blue",
     "checked-in": "green",
     "checked-out": "silver",
   };
-
+  const navigate = useNavigate();
+  const {checkout, isCheckingOut} = useCheckout();
+  const {deleteBooking, isDeleting} = useDeleteBooking();
   return (
     <Table.Row>
       <Cabin>{cabinName}</Cabin>
@@ -65,20 +73,53 @@ function BookingRow({
 
       <Stacked>
         <span>
-          {isToday(new Date(startDate))
+          {isToday(new Date(start_date))
             ? "Today"
-            : formatDistanceFromNow(startDate)}{" "}
-          &rarr; {numNights} night stay
+            : formatDistanceFromNow(start_date)}{" "}
+          &rarr; {num_nights} night stay
         </span>
         <span>
-          {format(new Date(startDate), "MMM dd yyyy")} &mdash;{" "}
-          {format(new Date(endDate), "MMM dd yyyy")}
+          {format(new Date(start_date), "MMM dd yyyy")} &mdash;{" "}
+          {format(new Date(end_date), "MMM dd yyyy")}
         </span>
       </Stacked>
 
       <Tag type={statusToTagName[status]}>{status.replace("-", " ")}</Tag>
 
-      <Amount>{formatCurrency(totalPrice)}</Amount>
+      <Amount>{formatCurrency(total_price)}</Amount>
+      <Modal>
+        <Menus.Menu>
+          <Menus.Toggle id={bookingId}/>
+          <Menus.List id={bookingId}>
+            <Menus.Button onClick={() => navigate(`/bookings/${bookingId}`)}><HiEye/>See details</Menus.Button>
+            {status === "unconfirmed"
+              && <Menus.Button onClick={() => navigate(`/checkin/${bookingId}`)}><HiArrowDownOnSquare/>Check
+                in</Menus.Button>}
+            {status === "checked-in"
+              && <Menus.Button
+                disabled={isCheckingOut}
+                onClick={() => {
+                  checkout(bookingId)
+                }}>
+                <HiArrowUpOnSquare/>Checkout
+              </Menus.Button>}
+
+            <Modal.Open opens={bookingId}>
+              <Menus.Button>
+                <HiTrash/>Delete
+              </Menus.Button>
+            </Modal.Open>
+          </Menus.List>
+          <Modal.Window name={bookingId}>
+            <ConfirmDelete
+              resourceName="Booking"
+              disabled={isDeleting}
+              onConfirm={() => {
+                deleteBooking(bookingId)
+              }}/>
+          </Modal.Window>
+        </Menus.Menu>
+      </Modal>
     </Table.Row>
   );
 }

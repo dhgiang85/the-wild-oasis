@@ -73,7 +73,6 @@ function CabinRow({cabin}) {
 
 
           <Modal>
-
             <Menus.Menu>
               <Menus.Toggle id={cabin.id}/>
               <Menus.List id={cabin.id}>

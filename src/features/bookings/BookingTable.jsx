@@ -1,10 +1,16 @@
 import BookingRow from "./BookingRow.jsx";
 import Table from "../../ui/Table.jsx";
 import Menus from "../../ui/Menus.jsx";
+import useBookings from "./useBookings.js";
+import Spinner from "../../ui/Spinner.jsx";
+import Empty from "../../ui/Empty.jsx";
+import Pagination from "../../ui/Pagination.jsx";
 
 function BookingTable() {
-  const bookings = [];
+  const {bookings, isLoading,count} = useBookings();
 
+  if (isLoading) return <Spinner />
+  if(!bookings.length) return <Empty resource="Bookings" />;
   return (
     <Menus>
       <Table columns="0.6fr 2fr 2.4fr 1.4fr 1fr 3.2rem">
@@ -20,9 +26,12 @@ function BookingTable() {
         <Table.Body
           data={bookings}
           render={(booking) => (
-            <BookingRow key={booking.id} booking={booking} />
+            <BookingRow key={booking.id} booking={booking}/>
           )}
         />
+        <Table.Footer>
+          <Pagination count={count} />
+        </Table.Footer>
       </Table>
     </Menus>
   );

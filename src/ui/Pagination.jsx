@@ -1,4 +1,7 @@
 import styled from "styled-components";
+import {HiChevronLeft, HiChevronRight} from "react-icons/hi2";
+import {useSearchParams} from "react-router-dom";
+import {PAGE_SIZE} from "../utils/constants.js";
 
 const StyledPagination = styled.div`
   width: 100%;
@@ -23,7 +26,7 @@ const Buttons = styled.div`
 
 const PaginationButton = styled.button`
   background-color: ${(props) =>
-    props.active ? " var(--color-brand-600)" : "var(--color-grey-50)"};
+      props.active ? " var(--color-brand-600)" : "var(--color-grey-50)"};
   color: ${(props) => (props.active ? " var(--color-brand-50)" : "inherit")};
   border: none;
   border-radius: var(--border-radius-sm);
@@ -55,3 +58,45 @@ const PaginationButton = styled.button`
     color: var(--color-brand-50);
   }
 `;
+
+
+
+function Pagination({count = 10}) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentPage = !searchParams.get("page")
+    ? 1
+    : Number(searchParams.get("page"));
+
+  const totalPages = Math.ceil(count / PAGE_SIZE);
+
+  function handleNextPage() {
+    const next = currentPage === totalPages ? currentPage : currentPage + 1;
+    searchParams.set("page", next)
+    setSearchParams(searchParams);
+
+  }
+
+  function handlePreviousPage() {
+    const prev = currentPage === 1 ? currentPage : currentPage - 1;
+    searchParams.set("page", prev)
+    setSearchParams(searchParams);
+  }
+
+  const from = (currentPage - 1) * PAGE_SIZE + 1;
+  const to = count > currentPage * PAGE_SIZE ? currentPage * PAGE_SIZE : count;
+  return (
+    <StyledPagination>
+      <P>
+        Showing <span>{from}</span> to <span>{to}</span> of <span>{count}</span> results
+      </P>
+      <Buttons>
+        <PaginationButton onClick={handlePreviousPage}
+                          disabled={currentPage === 1}><HiChevronLeft/>Previous</PaginationButton>
+        <PaginationButton onClick={handleNextPage}
+                          disabled={currentPage === totalPages}>Next<HiChevronRight/></PaginationButton>
+      </Buttons>
+    </StyledPagination>
+  );
+}
+
+export default Pagination;
