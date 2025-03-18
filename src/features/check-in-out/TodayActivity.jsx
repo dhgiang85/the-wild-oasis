@@ -2,6 +2,9 @@ import styled from "styled-components";
 
 import Heading from "../../ui/Heading";
 import Row from "../../ui/Row";
+import Spinner from "../../ui/Spinner.jsx";
+import useTodayActivity from "../dashboard/useTodayActivity.js";
+import TodayItem from "./TodayItem.jsx";
 
 const StyledToday = styled.div`
   /* Box */
@@ -37,11 +40,20 @@ const NoActivity = styled.p`
 `;
 
 function Today() {
+  const {activities, isLoading} = useTodayActivity();
   return (
     <StyledToday>
       <Row type="horizontal">
         <Heading as="h2">Today</Heading>
       </Row>
+        {isLoading && <Spinner />}
+        {!isLoading && (
+          <TodayList>
+            {!activities.length && <NoActivity>No Activity today</NoActivity>}
+            {activities.map(activity => <TodayItem activity={activity}  key={activity.id}/>)}
+          </TodayList>
+        )}
+
     </StyledToday>
   );
 }

@@ -58,35 +58,3 @@ export async function createEditCabin(newCabin, id) {
 
   return data;
 }
-
-// export async function createEditCabin(newCabin) {
-//
-//   // 1. Create name for image
-//   const imageName = `${Math.random()}-${newCabin.image.name.replaceAll("/", "")}`;
-//   const imageUrl = `${REACT_APP_SUPABASE_URL}/storage/v1/object/public/cabin-images/${imageName}`;
-//   // 2. Create New Cabin
-//   const {data, error} = await supabase
-//     .from('cabins')
-//     .insert([
-//       {...newCabin, image: imageUrl},
-//     ])
-//     .select()
-//   if (error) {
-//     console.error(error.message);
-//     throw new Error("Cabins could not be created.");
-//   }
-//   // 3. Upload image up bucket
-//   const {error: storageImageError} = await supabase.storage
-//     .from('cabin-images')
-//     .upload(imageName, newCabin.image);
-//   // 4. If upload image error. delete cabin
-//   if (storageImageError) {
-//     console.error(storageImageError.message);
-//     await supabase
-//       .from('cabins')
-//       .delete()
-//       .eq('id', data.id)
-//     throw new Error("Image could not be uploaded.");
-//   }
-//   return data;
-// }
